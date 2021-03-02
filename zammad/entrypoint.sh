@@ -5,16 +5,6 @@ fail() {
   echo "$1" > /dev/stderr
   exit 1
 }
-
-waitDB() {
-  wait-for-it "${DB_HOST}:${DB_PORT}" -- echo "Database is alive"
-}
-waitElasticSearch() {
-  wait-for-it "${ES_HOST}:${ES_PORT}" -- echo "ElasticSearch is alive"
-}
-waitZammad() {
-  wait-for-it "zammad:3000" -- echo "Zammad is alive"
-}
 # Configure environment
 THREADS=$(( $(nproc) * 50 ))
 export MIN_THREADS=1
@@ -27,6 +17,9 @@ export RAILS_LOG_TO_STDOUT=true
 [ -n "$DB_USER" ] || fail "DB_USER is not set"
 [ -n "$DB_PASS" ] || fail "DB_PASS is not set"
 # Prepare
+waitDB() {
+  wait-for-it "${DB_HOST}:${DB_PORT}" -- echo "Database is alive"
+}
 ## Initialize db configuration file
 cat > config/database.yml <<EOF
 default: &default
@@ -72,17 +65,26 @@ if [ "$1" = "zammad" ]; then
   fi
 fi
 ## ElasticSearch
-if [ -n "${ES_HOST}" ]; then
-  waitElasticSearch
-  bundle exec rails r "Setting.set('es_url', 'http://${ES_HOST}:${ES_PORT}')"
-  if [ -z "${SKIP_ES_REINDEX}" ]; then
-    bundle exec rake searchindex:rebuild
+if [ "$1" = "zammad" ]; then
+  waitElasticSearch() {
+    wait-for-it "${ES_HOST}:${ES_PORT}" -- echo "ElasticSearch is alive"
+  }
+  if [ -n "${ES_HOST}" ]; then
+    waitElasticSearch
+    bundle exec rails r "Setting.set('es_url', '${ES_SCHEMA}://${ES_HOST}:${ES_PORT}')"
+    bundle exec rails r "Setting.set('es_index', 'zammad')"
+    if [ -z "${SKIP_ES_REINDEX}" ]; then
+      bundle exec rake searchindex:rebuild
+    fi
+  else
+    echo 'ElasticSearch disabled'
+    bundle exec rails r "Setting.set('es_url', '')"
   fi
-else
-  echo 'ElasticSearch disabled'
-  bundle exec rails r "Setting.set('es_url', '')"
 fi
 # Start programs
+waitZammad() {
+  wait-for-it "zammad:3000" -- echo "Zammad is alive"
+}
 if [ "$1" = "zammad" ]; then
   echo 'Starting Rails'
   test -f /opt/zammad/tmp/pids/server.pid && rm /opt/zammad/tmp/pids/server.pid

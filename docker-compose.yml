@@ -34,6 +34,16 @@ services:
     networks:
       zammad_db: {}
     volumes: [ 'zammad_db:/var/lib/postgresql/data' ]
+  elasticsearch:
+    restart: on-failure
+    build: elasticsearch
+    environment:
+    - "discovery.type=single-node"
+    - "http.max_content_length=400mb"
+    - "indices.query.bool.max_clause_count=2000"
+    networks:
+      zammad_es: {}
+    volumes: [ 'zammad_es:/usr/share/elasticsearch/data' ]
   # Zammad
   zammad:
     command: zammad
@@ -50,10 +60,14 @@ services:
       DB_PORT: 5432
       DB_USER: zammad
       DB_PASS: zammad
+      ES_SCHEMA: http
+      ES_HOST: elasticsearch
+      ES_PORT: 9200
       NO_PRECOMPILE_ASSETS: 'y'
     networks: &zammad-networks
       frontend: {}
       zammad_db: {}
+      zammad_es: {}
     labels:
     - traefik.enable=true
     - traefik.http.routers.zammad.rule=Host(`${HOST}`)
@@ -86,7 +100,9 @@ services:
 networks:
   frontend: {}
   zammad_db: {}
+  zammad_es: {}
 
 volumes:
-  zammad_db: {}
   traefik: {}
+  zammad_db: {}
+  zammad_es: {}
