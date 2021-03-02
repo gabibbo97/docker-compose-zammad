@@ -26,7 +26,7 @@ services:
   # Zammad databases
   database:
     restart: on-failure
-    image: postgres:13.2
+    image: postgres:${POSTGRES_VERSION}
     environment:
       POSTGRES_DB: zammad
       POSTGRES_USER: zammad
@@ -36,7 +36,10 @@ services:
     volumes: [ 'zammad_db:/var/lib/postgresql/data' ]
   elasticsearch:
     restart: on-failure
-    build: elasticsearch
+    build:
+      context: ./elasticsearch
+      args:
+        ELASTICSEARCH_VERSION: ${ELASTICSEARCH_VERSION}
     environment:
     - "discovery.type=single-node"
     - "http.max_content_length=400mb"
@@ -64,6 +67,10 @@ services:
       ES_HOST: elasticsearch
       ES_PORT: 9200
       NO_PRECOMPILE_ASSETS: 'y'
+      # Backup
+      BACKUP_ENABLED: "${BACKUP_ENABLED}"
+      BACKUP_HOLD_DAYS: "${BACKUP_HOLD_DAYS}"
+      BACKUP_INTERVAL_HOURS: "${BACKUP_INTERVAL_HOURS}"
     networks: &zammad-networks
       frontend: {}
       zammad_db: {}
@@ -75,6 +82,11 @@ services:
     - traefik.http.services.zammad.loadbalancer.server.port=3000
     - traefik.http.routers.zammad.tls=${ENABLE_TLS}
     - traefik.http.routers.zammad.tls.certresolver=letsencrypt
+    - traefik.http.routers.zammad.middlewares=default-chain
+    - traefik.http.middlewares.do-compression.compress=true
+    - traefik.http.middlewares.do-retries.retry.attempts=3
+    - traefik.http.middlewares.do-retries.retry.initialinterval=100ms
+    - traefik.http.middlewares.default-chain.chain.middlewares=do-compression,do-retries
 
   zammad-websocket:
     command: websocket
@@ -88,6 +100,9 @@ services:
     - traefik.http.routers.zammad-ws.rule=Host(`${HOST}`) && Path(`/ws`)
     - traefik.http.routers.zammad-ws.priority=10
     - traefik.http.services.zammad-ws.loadbalancer.server.port=6042
+    - traefik.http.routers.zammad-ws.tls=${ENABLE_TLS}
+    - traefik.http.routers.zammad-ws.tls.certresolver=letsencrypt
+    - traefik.http.routers.zammad-ws.middlewares=default-chain
 
   zammad-scheduler:
     command: scheduler
@@ -96,6 +111,18 @@ services:
     build: *zammad-build-context
     environment: *zammad-environment
     networks: *zammad-networks
+  
+  zammad-backup:
+    command: backup
+    depends_on: [ 'database', 'zammad' ]
+    restart: *zammad-restart-policy
+    build:
+      context: ./backup
+      args:
+        POSTGRES_VERSION: ${POSTGRES_VERSION}
+    environment: *zammad-environment
+    networks: *zammad-networks
+    volumes: [ 'zammad_backup:/var/lib/zammad-backup' ]
 
 networks:
   frontend: {}
@@ -104,5 +131,6 @@ networks:
 
 volumes:
   traefik: {}
+  zammad_backup: {}
   zammad_db: {}
   zammad_es: {}
