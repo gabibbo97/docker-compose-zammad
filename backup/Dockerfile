@@ -2,7 +2,7 @@ ARG POSTGRES_VERSION
 FROM postgres:${POSTGRES_VERSION}
 RUN apt-get update -qq && apt-get install -y \
   wait-for-it \
-  zstd
+  tar
 #
 # Scripts
 #

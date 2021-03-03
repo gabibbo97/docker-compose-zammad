@@ -87,6 +87,8 @@ services:
     - traefik.http.middlewares.do-retries.retry.attempts=3
     - traefik.http.middlewares.do-retries.retry.initialinterval=100ms
     - traefik.http.middlewares.default-chain.chain.middlewares=do-compression,do-retries
+    volumes:
+    - zammad:/opt/zammad
 
   zammad-websocket:
     command: websocket
@@ -123,6 +125,7 @@ services:
     environment: *zammad-environment
     networks: *zammad-networks
     volumes: [ 'zammad_backup:/var/lib/zammad-backup' ]
+    volumes_from: [ 'zammad' ]
 
 networks:
   frontend: {}
@@ -131,6 +134,7 @@ networks:
 
 volumes:
   traefik: {}
+  zammad: {}
   zammad_backup: {}
   zammad_db: {}
   zammad_es: {}

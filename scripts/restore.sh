@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
 # Grab backup
-[ -f backup.sql ] || sh scripts/grab-backup.sh
+[ -f database.sql ] || sh scripts/grab-backup.sh
+[ -f files.tar ] || sh scripts/grab-backup.sh
 # Perform restore
 docker-compose stop zammad-scheduler
 docker-compose stop zammad-websocket
@@ -14,6 +15,9 @@ EOF
   sleep 1
 done
 docker-compose exec zammad bundle exec env RAILS_ENV=production bundle exec rake db:create
-docker-compose exec -T database env PGPASSWORD=zammad psql -U zammad zammad_production < backup.sql
+docker-compose exec -T database env PGPASSWORD=zammad psql -U zammad zammad_production < database.sql
+docker-compose exec -T zammad tar -C / --overwrite -xvf - < files.tar
+docker-compose exec zammad bundle exec env RAILS_ENV=production rails r "Cache.clear"
+docker-compose restart zammad
 docker-compose start zammad-scheduler
 docker-compose start zammad-websocket

@@ -1,7 +1,21 @@
 #!/bin/sh
 set -e
-# Grab latest backup
-LATEST_BACKUP_NAME=$(docker-compose exec zammad-backup sh -c "find /var/lib/zammad-backup -type f -print0 | xargs -r -0 ls -l1 -t | head -n 1 | rev | awk '{ print \$1 }' | rev | tr -d '[:space:]'")
-echo "Latest backup ${LATEST_BACKUP_NAME}"
-docker-compose exec zammad-backup sh -c "cat '${LATEST_BACKUP_NAME}' | zstd -d -" > backup.sql
-echo "Grabbed backup"
+
+docker volume list -q | while read -r volume; do
+  # Find volume name
+  if ! docker volume inspect "${volume}" | grep 'com' | grep 'docker' | grep 'compose' | grep 'volume' | grep -q 'zammad_backup'; then
+    continue
+  fi
+  # Find mountpoint
+  MOUNTPOINT=$(docker volume inspect -f '{{.Mountpoint}}' "${volume}")
+  echo "Backup volume is at ${MOUNTPOINT}"
+  # Find latest backup
+  LATEST_BACKUP="$(find "${MOUNTPOINT}" -type f -print0 | xargs -r -0 ls -1 -t | head -1)"
+  echo "Latest backup is at ${LATEST_BACKUP}"
+  # Extract latest backup
+  rm -f database.sql files.tar
+  tar -xvzf "${LATEST_BACKUP}"
+  # Done
+  echo 'Grabbed backup'
+  break
+done
