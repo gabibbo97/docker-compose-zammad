@@ -12,6 +12,8 @@ Set up quickly a Zammad 3.6.0 helpdesk with TLS via docker-compose.
 
 All configuration is done via the `.env` file.
 
+An [example](.env.example) has been provided.
+
 | Variable              | Description                                   | Default                      |
 | :-------------------- | :-------------------------------------------- | :--------------------------- |
 | BACKUP_ENABLED        | Enable backups                                | true                         |
