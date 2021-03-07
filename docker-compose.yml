@@ -106,6 +106,7 @@ services:
     - traefik.http.routers.zammad-ws.tls=${ENABLE_TLS}
     - traefik.http.routers.zammad-ws.tls.certresolver=letsencrypt
     - traefik.http.routers.zammad-ws.middlewares=default-chain
+    volumes_from: [ 'zammad' ]
 
   zammad-scheduler:
     command: scheduler
@@ -114,7 +115,8 @@ services:
     build: *zammad-build-context
     environment: *zammad-environment
     networks: *zammad-networks
-  
+    volumes_from: [ 'zammad' ]
+
   zammad-backup:
     command: backup
     depends_on: [ 'database', 'zammad' ]
