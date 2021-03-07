@@ -29,6 +29,7 @@ An [example](.env.example) has been provided.
 | RUBY_VERSION          | The version of Ruby to use                    | 2.6.6                        |
 | POSTGRES_VERSION      | The version of PostgreSQL to use              | 13.2                         |
 | ELASTICSEARCH_VERSION | The version of ElasticSearch to use           | 7.11.1                       |
+| TRAEFIK_VERSION       | The version of Traefik to use                 | 2.4.6                        |
 | INSECURE_OPENSSL      | Use weaker OpenSSL defaults                   | n                            |
 
 ## Troubleshooting

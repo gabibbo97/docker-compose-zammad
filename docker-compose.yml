@@ -5,7 +5,7 @@ services:
   traefik:
     depends_on: [ 'zammad' ]
     restart: on-failure
-    image: traefik:v2.4.5
+    image: traefik:v${TRAEFIK_VERSION}
     command: >-
       --entrypoints.web.address=:80 --entrypoints.websecure.address=:443
       --providers.docker --providers.docker.exposedByDefault=false
