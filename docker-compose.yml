@@ -84,10 +84,13 @@ services:
     - traefik.http.routers.zammad.tls=${ENABLE_TLS}
     - traefik.http.routers.zammad.tls.certresolver=letsencrypt
     - traefik.http.routers.zammad.middlewares=default-chain
+    - traefik.http.middlewares.do-https.redirectscheme.permanent=true
+    - traefik.http.middlewares.do-https.redirectscheme.port=${HTTPS_PORT}
+    - traefik.http.middlewares.do-https.redirectscheme.scheme=https
     - traefik.http.middlewares.do-compression.compress=true
     - traefik.http.middlewares.do-retries.retry.attempts=3
     - traefik.http.middlewares.do-retries.retry.initialinterval=100ms
-    - traefik.http.middlewares.default-chain.chain.middlewares=do-compression,do-retries
+    - traefik.http.middlewares.default-chain.chain.middlewares=do-https,do-compression,do-retries
     volumes:
     - zammad:/opt/zammad
 
