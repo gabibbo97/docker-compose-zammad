@@ -4,7 +4,7 @@ FROM ruby:${RUBY_VERSION}
 ARG ZAMMAD_VERSION
 WORKDIR /opt/zammad
 RUN mkdir -p /opt/zammad \
-  && wget -O - https://ftp.zammad.com/zammad-${ZAMMAD_VERSION}.tar.gz | tar -xzf -
+  && curl -sSfL https://ftp.zammad.com/zammad-${ZAMMAD_VERSION}.tar.gz | tar -xzf -
 # Install Zammad
 RUN gem install bundler rake rails
 RUN apt-get update -qq && apt-get install -y libimlib2 libimlib2-dev
