@@ -87,6 +87,7 @@ waitZammad() {
 }
 if [ "$1" = "zammad" ]; then
   echo 'Starting Rails'
+  ruby --version
   test -f /opt/zammad/tmp/pids/server.pid && rm /opt/zammad/tmp/pids/server.pid
   exec /opt/zammad/bin/bundle exec rails server -b 0.0.0.0 -p 3000
 elif [ "$1" = "websocket" ]; then
