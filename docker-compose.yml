@@ -91,6 +91,9 @@ services:
     - traefik.http.middlewares.do-retries.retry.attempts=3
     - traefik.http.middlewares.do-retries.retry.initialinterval=100ms
     - traefik.http.middlewares.default-chain.chain.middlewares=do-https,do-compression,do-retries
+    tmpfs:
+    - /opt/zammad/tmp
+    - /opt/zammad/tmp/pids
     volumes:
     - zammad:/opt/zammad
 
