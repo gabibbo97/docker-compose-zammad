@@ -77,6 +77,7 @@ services:
       zammad_es: {}
     labels:
     - traefik.enable=true
+    - traefik.docker.network=frontend
     - traefik.http.routers.zammad.rule=Host(`${HOST}`)
     - traefik.http.routers.zammad.priority=100
     - traefik.http.services.zammad.loadbalancer.server.port=3000
@@ -128,9 +129,15 @@ services:
     volumes_from: [ 'zammad' ]
 
 networks:
-  frontend: {}
-  zammad_db: {}
-  zammad_es: {}
+  frontend:
+    driver: bridge
+    name: frontend
+  zammad_db:
+    driver: bridge
+    name: zammad_db
+  zammad_es:
+    driver: bridge
+    name: zammad_es
 
 volumes:
   traefik: {}
