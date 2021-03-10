@@ -109,7 +109,7 @@ services:
     - traefik.http.services.zammad-ws.loadbalancer.server.port=6042
     - traefik.http.routers.zammad-ws.tls=${ENABLE_TLS}
     - traefik.http.routers.zammad-ws.tls.certresolver=letsencrypt
-    - traefik.http.routers.zammad.middlewares=default-chain-zmws
+    - traefik.http.routers.zammad-ws.middlewares=default-chain-zmws
     - traefik.http.middlewares.do-https-zmws.redirectscheme.permanent=true
     - traefik.http.middlewares.do-https-zmws.redirectscheme.port=${HTTPS_PORT}
     - traefik.http.middlewares.do-https-zmws.redirectscheme.scheme=https
