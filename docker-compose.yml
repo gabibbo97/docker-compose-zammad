@@ -50,6 +50,7 @@ services:
     volumes: [ 'zammad_es:/usr/share/elasticsearch/data' ]
   # Zammad
   zammad:
+    mem_limit: ${ZAMMAD_MEMLIMIT}
     command: zammad
     depends_on: &zammad-depends-on [ 'database' ]
     restart: &zammad-restart-policy on-failure
