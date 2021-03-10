@@ -35,6 +35,7 @@ services:
       zammad_db: {}
     volumes: [ 'zammad_db:/var/lib/postgresql/data' ]
   elasticsearch:
+    mem_limit: ${ELASTICSEARCH_MEMLIMIT}
     restart: on-failure
     build:
       context: ./elasticsearch
