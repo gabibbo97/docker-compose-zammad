@@ -13,4 +13,7 @@ tar -C / -cvf "${TMPDIR}"/files.tar --exclude='tmp' /opt/zammad
 # Pack everything
 BACKUP_FILE="/var/lib/zammad-backup/zammad-$(date -Iseconds -u).tar.gz"
 tar -C "${TMPDIR}" -cvzf "${BACKUP_FILE}" .
+if [ -d "${TMPDIR}" ]; then
+  rm -rf "${TMPDIR}"
+done
 echo 'Backup complete'
